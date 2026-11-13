@@ -1,35 +1,34 @@
 name: Build EXEs
-
 on:
-  push:
-    branches: [ main ]
   workflow_dispatch:
-
+  issue_comment:
+    types: [created]
 jobs:
   build:
+    # Run manually, or when a trusted user comments "compile" on a PR
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.issue.pull_request &&
+       contains(github.event.comment.body, 'compile') &&
+       contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association))
     runs-on: windows-latest
-
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-
+      with:
+        ref: ${{ github.event_name == 'issue_comment' && format('refs/pull/{0}/head', github.event.issue.number) || github.ref }}
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
-
     - name: Install NuGet
       uses: NuGet/setup-nuget@v2
-
     - name: Restore NuGet packages
       run: |
         nuget restore src/DesktopPet_Portable.sln
         nuget restore Tools/PetEditor.sln
-
     - name: Build DesktopPet
       run: msbuild src/DesktopPet_Portable.sln -p:Configuration=Release -p:Platform=x64 -p:RestorePackages=false
-
     - name: Build PetEditor
       run: msbuild Tools/PetEditor.sln -p:Configuration=Release -p:Platform=x64 -p:RestorePackages=false
-
     - name: Upload DesktopPet artifact
       uses: actions/upload-artifact@v4
       with:
@@ -37,7 +36,6 @@ jobs:
         path: build/DesktopPetPortable/bin/Release/x64
         retention-days: 90
         if-no-files-found: error
-
     - name: Upload PetEditor artifact
       uses: actions/upload-artifact@v4
       with:
