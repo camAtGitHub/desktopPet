@@ -1753,8 +1753,10 @@ namespace DesktopPet
 		/// </example>
 		/// <param name="sender">Caller object.</param>
 		/// <param name="e">Dragging event values.</param>
-		private void Form2_DragDrop(object sender, DragEventArgs e)
+		private async void Form2_DragDrop(object sender, DragEventArgs e)
         {
+            try
+            {
             var files = (string[])e.Data.GetData(DataFormats.FileDrop);
 			var xmlString = e.Data.GetData(DataFormats.Text);
             // If a file was dropped (XML as a file)
@@ -1767,7 +1769,7 @@ namespace DesktopPet
                     {
                         Program.Mainthread.KillSheep(this);
                         Program.MyData.SetXml(File.ReadAllText(file), "..");
-                        Program.Mainthread.LoadNewXMLFromString(File.ReadAllText(file));
+                        await Program.Mainthread.LoadNewXMLFromString(File.ReadAllText(file));
                         break;  // Currently only 1 file, in future maybe more animations at the same time
                     }
                 }
@@ -1783,13 +1785,18 @@ namespace DesktopPet
 
 					Program.Mainthread.KillSheep(this);
 					Program.MyData.SetXml(xmlString as String, "..");
-					Program.Mainthread.LoadNewXMLFromString(xmlString as String);
+					await Program.Mainthread.LoadNewXMLFromString(xmlString as String);
 				}
 				catch
 				{
 					StartUp.AddDebugInfo(StartUp.DEBUG_TYPE.error, "invalid animation xml");
 				}
 			}
+            }
+            catch (Exception ex)
+            {
+                StartUp.AddDebugInfo(StartUp.DEBUG_TYPE.error, "drag drop failed: " + ex.Message);
+            }
         }
 
         private void Form2_FormClosed(object sender, FormClosedEventArgs e)
