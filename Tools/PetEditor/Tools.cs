@@ -1228,7 +1228,9 @@ namespace PetEditor
 
         private void pictureBox6_MouseDown(object sender, MouseEventArgs e)
         {
-            if (petAnimations.AnimationDrag >= 0)
+            if (petAnimations != null && petAnimations.AnimationDrag >= 0 &&
+                petAnimations.SheepAnimations.ContainsKey(petAnimations.AnimationDrag) &&
+                XmlTools.GetXmlAnimationNode(petAnimations.AnimationDrag) != null)
             {
                 SetNewAnimationWithId(petAnimations.AnimationDrag);
                 PetValues.IsDragging = true;
