@@ -258,6 +258,7 @@ namespace DesktopPet
                 {
                     sheeps[i].Kill();
                     for (int j = i; j < iSheeps - 1; j++) sheeps[j] = sheeps[j + 1];
+                    sheeps[iSheeps - 1] = null;     // do not keep a stale reference to a removed pet
                     iSheeps--;
                     Application.DoEvents();
                     bSheepRemoved = true;
