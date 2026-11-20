@@ -133,10 +133,10 @@ namespace PetEditor
                 ani.Gravity = node.Gravity != null;
 
                 ani.Name = node.Name;
-                switch (ani.Name)
+                switch ((ani.Name ?? "").Trim().ToLowerInvariant())
                 {
                     case "fall": animations.AnimationFall = node.Id; break;
-                    case "drag": animations.AnimationDrag = node.Id; break;
+                    case "drag": animations.AnimationDrag = node.Id; animations.HasDragAnimation = true; break;
                     case "kill": animations.AnimationKill = node.Id; break;
                     case "sync": animations.AnimationSync = node.Id; break;
                 }

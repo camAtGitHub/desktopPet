@@ -303,7 +303,76 @@ namespace PetEditor
                 contextMenuStrip1.Show(tabPage3, new Point(tabPage3.Width / 10, tabPage3.Height / 2));
                 spawnsToolStripMenuItem.ShowDropDown();
 
+                BuildJumpToMenus();
                 UpdateRunWindow();
+            }
+        }
+
+        private const int JumpMenuGroupSize = 20;
+
+        /// <summary>
+        /// (Re)build the "Jump to" menu on both Test/Run context menus, listing all animations of the loaded pet.
+        /// </summary>
+        private void BuildJumpToMenus()
+        {
+            foreach (var strip in new[] { contextMenuStrip1, contextMenuStrip2 })
+            {
+                for (int i = strip.Items.Count - 1; i >= 0; i--)
+                {
+                    if ((strip.Items[i].Tag as string) == "jumpTo")
+                    {
+                        strip.Items.RemoveAt(i);
+                    }
+                }
+                var jumpItem = new ToolStripMenuItem("Jump to") { Tag = "jumpTo" };
+                var nodes = (Program.AnimationXML?.Animations?.Animation ?? new XmlData.AnimationNode[0])
+                    .Where(n => n != null).ToList();
+                jumpItem.Enabled = nodes.Count > 0;
+                for (int start = 0; start < nodes.Count; start += JumpMenuGroupSize)
+                {
+                    var parent = jumpItem;
+                    if (nodes.Count > JumpMenuGroupSize)
+                    {
+                        int end = Math.Min(start + JumpMenuGroupSize, nodes.Count) - 1;
+                        parent = new ToolStripMenuItem("Id " + nodes[start].Id + " - " + nodes[end].Id);
+                        jumpItem.DropDownItems.Add(parent);
+                    }
+                    for (int i = start; i < Math.Min(start + JumpMenuGroupSize, nodes.Count); i++)
+                    {
+                        int id = nodes[i].Id;
+                        var item = parent.DropDownItems.Add(id + " (" + nodes[i].Name + ")");
+                        item.Click += (s, e) => JumpToAnimation(id);
+                    }
+                }
+                strip.Items.Add(jumpItem);
+            }
+        }
+
+        /// <summary>
+        /// Start any animation out of sequence. As for every animation, the run pauses at its end and the next menu is shown.
+        /// </summary>
+        /// <param name="id">Animation id to play.</param>
+        private void JumpToAnimation(int id)
+        {
+            try
+            {
+                if (petAnimations == null || !petAnimations.SheepAnimations.ContainsKey(id) ||
+                    XmlTools.GetXmlAnimationNode(id) == null)
+                {
+                    Program.AddLog("Unable to jump to animation " + id + ": animation not found", "RUN PET", Program.LOG_TYPE.WARNING);
+                    return;
+                }
+                timer1.Enabled = false;
+                PetValues.IsDragging = false;
+                PetValues.OffsetY = 0.0;
+                PetValues.Opacity = 1.0;
+                SetNewAnimationWithId(id);
+                timer1.Enabled = true;
+            }
+            catch (Exception ex)
+            {
+                timer1.Enabled = false;
+                Program.AddLog("Unable to jump to animation " + id + ": " + ex.Message, "RUN PET", Program.LOG_TYPE.ERROR);
             }
         }
 
@@ -1232,9 +1301,8 @@ namespace PetEditor
 
         private void pictureBox6_MouseDown(object sender, MouseEventArgs e)
         {
-            if (petAnimations != null && petAnimations.AnimationDrag >= 0 &&
-                petAnimations.SheepAnimations.ContainsKey(petAnimations.AnimationDrag) &&
-                XmlTools.GetXmlAnimationNode(petAnimations.AnimationDrag) != null)
+            if (petAnimations != null && petAnimations.HasDragAnimation &&
+                petAnimations.SheepAnimations.ContainsKey(petAnimations.AnimationDrag))
             {
                 SetNewAnimationWithId(petAnimations.AnimationDrag);
                 PetValues.IsDragging = true;
