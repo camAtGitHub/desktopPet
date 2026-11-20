@@ -263,12 +263,12 @@ namespace PetEditor
 
         private void tabControl1_Selecting(object sender, TabControlCancelEventArgs e)
         {
-            if(tabControl1.SelectedTab == tabPage2)
+            if(e.TabPage == tabPage2)
             {
                 button2.Enabled = button3.Enabled = false;
                 label1.Text = label4.Text = label6.Text = "PLEASE TEST...";
             }
-            if (tabControl1.SelectedTab == tabPage3)
+            if (e.TabPage == tabPage3)
             {
                 label8.Text = DateTime.Now.ToShortTimeString();
                 label7.Text = DateTime.Now.ToShortDateString();
@@ -1301,6 +1301,9 @@ namespace PetEditor
 
         private void pictureBox6_MouseDown(object sender, MouseEventArgs e)
         {
+            if (e.Button != MouseButtons.Left)
+                return;
+
             if (petAnimations != null && petAnimations.HasDragAnimation &&
                 petAnimations.SheepAnimations.ContainsKey(petAnimations.AnimationDrag))
             {
