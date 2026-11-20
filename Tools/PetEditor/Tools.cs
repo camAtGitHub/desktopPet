@@ -286,7 +286,9 @@ namespace PetEditor
                 var spawnNodes = Program.AnimationXML.Spawns?.Spawn ?? new XmlData.SpawnNode[0];
                 foreach (var s in spawnNodes)
                 {
-                    var spawnItem = spawnsToolStripMenuItem.DropDownItems.Add("Spawn #" + s.Id + " -> " + XmlTools.GetXmlAnimationNode(s.Id).Name);
+                    var animationNode = XmlTools.GetXmlAnimationNode(s.Next);
+                    var spawnItem = spawnsToolStripMenuItem.DropDownItems.Add(
+                        "Spawn #" + s.Id + " -> " + (animationNode?.Name ?? "missing animation " + s.Next));
                     spawnItem.Click += (se, ev) =>
                     {
                         TSpawn spawn = petAnimations.SheepSpawn[s.Id];
