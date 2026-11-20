@@ -283,13 +283,10 @@ namespace PetEditor
             }
             else
             {
+                xmlViewer.Show();
+                formChat.Hide();
+                editWindows.Hide();
                 xmlViewer.SelectSection(section);
-                if (editWindows.Visible)
-                {
-                    xmlViewer.Show();
-                    formChat.Hide();
-                    editWindows.Hide();
-                }
             }
 
             if(section == "view xml")

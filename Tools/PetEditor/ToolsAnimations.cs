@@ -443,6 +443,10 @@ namespace PetEditor
             /// </summary>
         public int AnimationDrag = 1;
             /// <summary>
+            /// True if the XML defines an animation named "drag".
+            /// </summary>
+        public bool HasDragAnimation = false;
+            /// <summary>
             /// Animation ID for the falling animation, after the dragged pet was released (default: 1)
             /// </summary>
         public int AnimationFall = 1;
