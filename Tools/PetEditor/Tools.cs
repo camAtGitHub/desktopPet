@@ -57,7 +57,14 @@ namespace PetEditor
             {
                 case "view xml": tabControl1.SelectedIndex = 0; break;
                 case "compile":  tabControl1.SelectedIndex = 1; break;
-                case "test/run": tabControl1.SelectedIndex = 2; break;
+                case "test/run":
+                    {
+                        bool alreadySelected = tabControl1.SelectedTab == tabPage3;
+                        tabControl1.SelectedIndex = 2;
+                        if (alreadySelected)
+                            InitializeTestRun();
+                    }
+                    break;
                 case "graphviz":
                     {
                         tabControl1.SelectedIndex = 3;
@@ -269,6 +276,15 @@ namespace PetEditor
                 label1.Text = label4.Text = label6.Text = "PLEASE TEST...";
             }
             if (e.TabPage == tabPage3)
+                InitializeTestRun();
+        }
+
+        private void InitializeTestRun()
+        {
+            timer1.Enabled = false;
+            PetValues.IsDragging = false;
+
+            try
             {
                 label8.Text = DateTime.Now.ToShortTimeString();
                 label7.Text = DateTime.Now.ToShortDateString();
@@ -307,6 +323,11 @@ namespace PetEditor
 
                 BuildJumpToMenus();
                 UpdateRunWindow();
+            }
+            catch (Exception ex)
+            {
+                timer1.Enabled = false;
+                Program.AddLog("Unable to initialize Test/Run: " + ex.Message, "RUN PET", Program.LOG_TYPE.ERROR);
             }
         }
 
